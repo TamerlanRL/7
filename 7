@@ -1,0 +1,109 @@
+#include <iostream>
+class Herbivore {
+public:
+    Herbivore(int weight, bool isAlive = true) : weight(weight), isAlive(isAlive) {}
+    virtual void EatGrass() {
+        if (isAlive) {
+            weight += 10;
+        }
+    }
+    bool IsAlive() const {
+        return isAlive;
+    }
+    int GetWeight() const {
+        return weight;
+    }
+    void SetIsAlive(bool alive) {
+        isAlive = alive;
+    }
+protected:
+    int weight;
+    bool isAlive;
+};
+class Wildebeest : public Herbivore {
+public:
+    Wildebeest(int weight) : Herbivore(weight) {}
+};
+class Bison : public Herbivore {
+public:
+    Bison(int weight) : Herbivore(weight) {}
+};
+class Carnivore {
+public:
+    Carnivore(int power) : power(power) {}
+    virtual void Eat(Herbivore& herbivore) {
+        if (herbivore.IsAlive()) {
+            if (power >= herbivore.GetWeight()) {
+                power += 10;
+            }
+            else {
+                power -= 10;
+            }
+            herbivore.SetIsAlive(false);
+        }
+    }
+protected:
+    int power;
+};
+class Lion : public Carnivore {
+public:
+    Lion(int power) : Carnivore(power) {}
+};
+class Wolf : public Carnivore {
+public:
+    Wolf(int power) : Carnivore(power) {}
+};
+class Continent {
+public:
+    virtual void Populate() = 0;
+};
+class Africa : public Continent {
+public:
+    void Populate() override {
+        Wildebeest wildebeest(100);
+        Bison bison(120);
+        Lion lion(80);
+        wildebeest.EatGrass();
+        bison.EatGrass();
+        lion.Eat(wildebeest);
+        std::cout << "Africa populated." << std::endl;
+    }
+};
+class NorthAmerica : public Continent {
+public:
+    void Populate() override {
+        Bison bison(130);
+        Wolf wolf(90);
+        bison.EatGrass();
+        wolf.Eat(bison);
+        std::cout << "North America populated." << std::endl;
+    }
+};
+class AnimalWorld {
+public:
+    void MealsHerbivores(Herbivore& herbivore) {
+        herbivore.EatGrass();
+    }
+    void NutritionCarnivores(Carnivore& carnivore, Herbivore& herbivore) {
+        carnivore.Eat(herbivore);
+    }
+};
+int main() {
+    Africa africa;
+    NorthAmerica northAmerica;
+    AnimalWorld animalWorld;
+    africa.Populate();
+    northAmerica.Populate();
+    Wildebeest wildebeest(100);
+    Bison bison(130);
+    Lion lion(80);
+    Wolf wolf(90);
+    std::cout << "Initial wildebeest weight: " << wildebeest.GetWeight() << std::endl;
+    std::cout << "Initial bison weight: " << bison.GetWeight() << std::endl;
+    animalWorld.MealsHerbivores(wildebeest);
+    animalWorld.MealsHerbivores(bison);
+    animalWorld.NutritionCarnivores(lion, wildebeest);
+    animalWorld.NutritionCarnivores(wolf, bison);
+    std::cout << "Final wildebeest weight: " << wildebeest.GetWeight() << std::endl;
+    std::cout << "Final bison weight: " << bison.GetWeight() << std::endl;
+}
